@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "pbf": "^3.0.2",
+    "pbf": "^3.0.4",
     "tiny-inflate": "^1.0.2"
   },
   "devDependencies": {},
