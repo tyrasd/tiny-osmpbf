@@ -79,6 +79,7 @@ module.exports = function(input) {
         break
         case p.relations.length > 0:
           for (var i=0; i<p.relations.length; i++) {
+            if (p.relations[i].info === null) p.relations[i].info = {}
             var tags = {}
             for (var j=0; j<p.relations[i].keys.length; j++)
               tags[strings[p.relations[i].keys[j]]] = strings[p.relations[i].vals[j]]
@@ -93,7 +94,7 @@ module.exports = function(input) {
               type: 'relation',
               id: p.relations[i].id,
               version: p.relations[i].info.version,
-              timestamp: new Date(p.relations[i].info.timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z',
+              timestamp: p.relations[i].info.timestamp && new Date(p.relations[i].info.timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z',
               changeset: p.relations[i].info.changeset,
               uid: p.relations[i].info.uid,
               user: strings[p.relations[i].info.user_sid],
@@ -105,6 +106,7 @@ module.exports = function(input) {
         break
         case p.ways.length > 0:
           for (var i=0; i<p.ways.length; i++) {
+            if (p.ways[i].info === null) p.ways[i].info = {}
             var tags = {}
             for (var j=0; j<p.ways[i].keys.length; j++)
               tags[strings[p.ways[i].keys[j]]] = strings[p.ways[i].vals[j]]
@@ -115,7 +117,7 @@ module.exports = function(input) {
               type: 'way',
               id: p.ways[i].id,
               version: p.ways[i].info.version,
-              timestamp: new Date(p.ways[i].info.timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z',
+              timestamp: p.ways[i].info.timestamp && new Date(p.ways[i].info.timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z',
               changeset: p.ways[i].info.changeset,
               uid: p.ways[i].info.uid,
               user: strings[p.ways[i].info.user_sid],
@@ -127,6 +129,7 @@ module.exports = function(input) {
         break
         case p.nodes.length > 0:
           for (var i=0; i<p.nodes.length; i++) {
+            if (p.nodes[i].info === null) p.nodes[i].info = {}
             var tags = {}
             for (var j=0; j<p.nodes[i].keys.length; j++)
               tags[strings[p.nodes[i].keys[j]]] = strings[p.nodes[i].vals[j]]
@@ -134,7 +137,7 @@ module.exports = function(input) {
               type: 'node',
               id: p.nodes[i].id,
               version: p.nodes[i].info.version,
-              timestamp: new Date(p.nodes[i].info.timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z',
+              timestamp: p.nodes[i].info.timestamp && new Date(p.nodes[i].info.timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z',
               changeset: p.nodes[i].info.changeset,
               uid: p.nodes[i].info.uid,
               user: strings[p.nodes[i].info.user_sid],
@@ -145,6 +148,15 @@ module.exports = function(input) {
         break
         case p.dense !== null:
           var id=0,lat=0,lon=0,timestamp=0,changeset=0,uid=0,user=0 //todo:visible
+          if (p.dense.denseinfo === null) {
+            p.dense.denseinfo = {
+              timestamp: [],
+              changeset: [],
+              uid: [],
+              user_sid: [],
+              version: []
+            }
+          }
           var j=0
           for (var i=0; i<Math.max(p.dense.id.length, p.dense.lat.length); i++) {
             id += p.dense.id[i]
@@ -168,7 +180,7 @@ module.exports = function(input) {
               version: p.dense.denseinfo.version[i],
               lat: 1E-9 * (osmData.lat_offset + (osmData.granularity * lat)),
               lon: 1E-9 * (osmData.lon_offset + (osmData.granularity * lon)),
-              timestamp: new Date(timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z',
+              timestamp: timestamp && new Date(timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z',
               changeset: changeset,
               uid: uid,
               user: strings[user],
