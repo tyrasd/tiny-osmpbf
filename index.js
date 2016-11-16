@@ -155,11 +155,13 @@ module.exports = function(input) {
             uid += p.dense.denseinfo.uid[i]
             user += p.dense.denseinfo.user_sid[i]
             var tags = {}
-            while (p.dense.keys_vals[j] != 0) {
-              tags[strings[p.dense.keys_vals[j]]] = strings[p.dense.keys_vals[j+1]]
-              j += 2
+            if (p.dense.keys_vals.length > 0) {
+              while (p.dense.keys_vals[j] != 0) {
+                tags[strings[p.dense.keys_vals[j]]] = strings[p.dense.keys_vals[j+1]]
+                j += 2
+              }
+              j++
             }
-            j++
             output.push({
               type: 'node',
               id: id,
