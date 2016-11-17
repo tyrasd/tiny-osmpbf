@@ -1,16 +1,31 @@
 {
   "name": "tiny-osmpbf",
   "version": "0.0.0",
-  "description": "",
+  "description": "smallest osm.pbf parser",
   "main": "index.js",
   "dependencies": {
     "pbf": "^3.0.4",
     "tiny-inflate": "^1.0.2"
   },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "devDependencies": {
+    "faucet": "0.0.1",
+    "tape": "^4.6.2"
   },
-  "author": "",
-  "license": "ISC"
+  "scripts": {
+    "test": "node test/index.js | faucet"
+  },
+  "author": "Martin Raifer",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tyrasd/tiny-osmpbf.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tyrasd/tiny-osmpbf/issues"
+  },
+  "keywords": [
+    "openstreetmap",
+    "osmpbf",
+    "pbf"
+  ]
 }
