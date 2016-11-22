@@ -9,6 +9,42 @@ var memberTypes = {
   2: 'relation'
 }
 
+var supportedFeatures = {
+  "OsmSchema-V0.6": true,
+  "DenseNodes": true,
+  "HistoricalInformation": true
+}
+
+
+// extracts and decompresses a data blob
+function extractBlobData(blob) {
+  // todo: add tests for non-zlib cases
+  switch (true) {
+    // error cases:
+
+    // * lzma compressed data (support for this kind of data is not required by the specs)
+    case blob.lzma_data !== null:
+      throw new Error("unsupported osmpbf blob data type: lzma_data")
+    // * formerly used for bzip2 compressed data, deprecated since 2010
+    case blob.OBSOLETE_bzip2_data !== null:
+      throw new Error("unsupported osmpbf blob data type: OBSOLETE_bzip2_data")
+    // * empty data blob??
+    default:
+      throw new Error("unsupported osmpbf blob data type: <empty blob>")
+
+    // supported data formats:
+
+    // * uncompressed data
+    case blob.raw !== null:
+      return blob.raw
+    // * zlib "deflate" compressed data
+    case blob.zlib_data !== null:
+      var blobData = new Buffer(blob.raw_size)
+      inflate(blob.zlib_data.slice(2), blobData)
+      return blobData
+  }
+}
+
 module.exports = function(input) {
   var output = []
 
@@ -22,24 +58,28 @@ module.exports = function(input) {
   pbf.length = pbf.pos + blobHeaderLength
   blobHeader = FileFormat.BlobHeader.read(pbf)
 
-  //console.log(blobHeader)
+  //console.error(blobHeader)
 
   pbf.pos = pbf.length
   pbf.length = pbf.pos + blobHeader.datasize
   blob = FileFormat.Blob.read(pbf)
 
-  // todo: uncompressed data
-  blobData = new Buffer(blob.raw_size)
-  inflate(blob.zlib_data.slice(2), blobData)
+  blobData = extractBlobData(blob)
 
   var osmHeader = new Pbf(blobData)
   osmHeader = OsmFormat.HeaderBlock.read(osmHeader)
-  // todo: check osm header data (required_features)
 
-  //console.log(osmHeader)
+  //console.error(osmHeader)
 
+  // check for required_features
+  var missingFeatures = osmHeader.required_features.filter(function(requiredFeature) {
+    return !supportedFeatures[requiredFeature]
+  })
+  if (missingFeatures.length > 0) {
+    throw new Error("unsupported required osmpbf feature(s): " + missingFeatures.join(', '))
+  }
 
-  // read data blocks
+  // read all data blobs
   while (pbf.pos < input.byteLength) {
 
     pbf.pos = pbf.length
@@ -48,35 +88,45 @@ module.exports = function(input) {
     pbf.length = pbf.pos + blobHeaderLength
     blobHeader = FileFormat.BlobHeader.read(pbf)
 
-    //console.log(blobHeaderLength, blobHeader)
-
     pbf.pos = pbf.length
     pbf.length = pbf.pos + blobHeader.datasize
     blob = FileFormat.Blob.read(pbf)
-    // todo: uncompressed data
-    blobData = new Buffer(blob.raw_size)
-    inflate(blob.zlib_data.slice(2), blobData)
+
+    blobData = extractBlobData(blob)
 
     var osmData = new Pbf(blobData)
     osmData = OsmFormat.PrimitiveBlock.read(osmData)
 
-    //console.log(osmData)
-    //console.log(osmData.primitivegroup[0].dense)
+    //console.error(osmData)
+    //console.error(osmData.primitivegroup[0].dense)
 
+    // unpack stringtable into js object
     var strings = osmData.stringtable.s.map(function(x) {
       return new Buffer(x).toString('utf8')
     })
 
-    //console.log(strings)
-
+    // set default values if not specified in the pbf file
+    // coordinate granularity
     osmData.granularity = osmData.granularity || 100
+    // date granularity
     osmData.date_granularity = osmData.date_granularity || 1000
+
+    // iterate over all groups of osm objects
     osmData.primitivegroup.forEach(function(p) {
+      // each "primitivegroup" can either be a list of changesets,
       switch(true) {
+        // error cases:
+
+        // * changesets
         case p.changesets.length > 0:
+          throw new Error("unsupported osmpbf primitive group data: changesets")
+        // * empty primitivegroup ???
         default:
-          console.error("unsupported osmpbf primitive group data", p)
-        break
+          throw new Error("unsupported osmpbf primitive group data: <empty primitivegroup>")
+
+        // supported data cases:
+
+        // * list of osm relations
         case p.relations.length > 0:
           for (var i=0; i<p.relations.length; i++) {
             if (p.relations[i].info === null) p.relations[i].info = {}
@@ -107,6 +157,8 @@ module.exports = function(input) {
             output.push(out)
           }
         break
+
+        // * list of osm ways
         case p.ways.length > 0:
           for (var i=0; i<p.ways.length; i++) {
             if (p.ways[i].info === null) p.ways[i].info = {}
@@ -133,6 +185,8 @@ module.exports = function(input) {
             output.push(out)
           }
         break
+
+        // * list of osm nodes
         case p.nodes.length > 0:
           for (var i=0; i<p.nodes.length; i++) {
             if (p.nodes[i].info === null) p.nodes[i].info = {}
@@ -155,6 +209,8 @@ module.exports = function(input) {
             output.push(out)
           }
         break
+
+        // * dense list of osm nodes
         case p.dense !== null:
           var id=0,lat=0,lon=0,timestamp=0,changeset=0,uid=0,user=0 //todo:visible
           var hasDenseinfo = true
@@ -202,15 +258,26 @@ module.exports = function(input) {
             }
             output.push(out)
           }
+        break
       }
     })
 
-
   }
 
+  // return collected data in OSM-JSON format (as used by Overpass API)
   return {
-    version: 0.6,
-    //todo: other stuff
-    elements: output
+    "version": 0.6,
+    "generator": osmHeader.writingprogram || "tiny-osmpbf",
+    "osm3s": {
+      "copyright": osmHeader.source,
+      "timestamp_osm_base": new Date(osmHeader.osmosis_replication_timestamp*1000).toISOString().substr(0, 19) + 'Z'
+    },
+    "bounds": osmHeader.bbox === null ? undefined : {
+      "minlat": 1E-9 * osmHeader.bbox.bottom,
+      "minlon": 1E-9 * osmHeader.bbox.left,
+      "maxlat": 1E-9 * osmHeader.bbox.top,
+      "maxlon": 1E-9 * osmHeader.bbox.right
+    },
+    "elements": output
   }
 }
