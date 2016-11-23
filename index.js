@@ -111,11 +111,16 @@ module.exports = function(input, handler) {
       return new Buffer(x).toString('utf8')
     })
 
-    // set default values if not specified in the pbf file
-    // coordinate granularity
-    osmData.granularity = osmData.granularity || 100
-    // date granularity
+    // date granularity: set default values if not specified in the pbf file
     osmData.date_granularity = osmData.date_granularity || 1000
+    // coordinate granularity: set default and pre-scale to nano-degrees
+    if (!osmData.granularity || osmData.granularity === 100)
+      osmData.granularity = 1E-7
+    else
+      osmData.granularity *= 1E-9
+    // pre-scale lat/lon offsets
+    osmData.lat_offset *= 1E-9
+    osmData.lon_offset *= 1E-9
 
     // iterate over all groups of osm objects
     osmData.primitivegroup.forEach(function(p) {
@@ -250,8 +255,8 @@ module.exports = function(input, handler) {
             var out = {
               type: 'node',
               id: id,
-              lat: 1E-9 * (osmData.lat_offset + (osmData.granularity * lat)),
-              lon: 1E-9 * (osmData.lon_offset + (osmData.granularity * lon)),
+              lat: osmData.lat_offset + (osmData.granularity * lat),
+              lon: osmData.lon_offset + (osmData.granularity * lon),
               tags: tags
             }
             if (hasDenseinfo) {
