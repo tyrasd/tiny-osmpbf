@@ -77,3 +77,17 @@ test('custom handler', function(t) {
   t.equal(count, 1577)
   t.equal(last.type, "relation")
 })
+
+test('header data', function(t) {
+  var input = fs.readFileSync(path.join(__dirname, './somes.pbf'))
+
+  t.plan(4)
+
+  var output = conv(input)
+
+  t.equal(output.generator, "0.43.1")
+  t.equal(output.osm3s.copyright, "http://www.openstreetmap.org/api/0.6")
+  //t.equal(output.osm3s.timestamp_osm_base, "1970-01-01T00:00:00Z") // todo: find test data with actual date set
+  t.equal(Math.round(1E6*output.bounds.minlat), Math.round(1E6*-41.264194819))
+  t.equal(Math.round(1E6*output.bounds.maxlon), Math.round(1E6*174.870800971))
+})

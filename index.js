@@ -46,11 +46,11 @@ function extractBlobData(blob) {
 }
 
 module.exports = function(input, handler) {
-  var output = undefined
+  var elements = undefined
   if (handler === undefined) {
-    var output = []
+    var elements = []
     handler = function(element) {
-      output.push(element)
+      elements.push(element)
     }
   }
 
@@ -271,19 +271,27 @@ module.exports = function(input, handler) {
   }
 
   // return collected data in OSM-JSON format (as used by Overpass API)
-  return {
+  var output = {
     "version": 0.6,
     "generator": osmHeader.writingprogram || "tiny-osmpbf",
-    "osm3s": {
-      "copyright": osmHeader.source,
-      "timestamp_osm_base": new Date(osmHeader.osmosis_replication_timestamp*1000).toISOString().substr(0, 19) + 'Z'
-    },
-    "bounds": osmHeader.bbox === null ? undefined : {
+  }
+  if (osmHeader.source !== "" || osmHeader.osmosis_replication_timestamp !== 0) {
+    output.osm3s = {}
+    if (osmHeader.source !== "") {
+      output.osm3s.copyright = osmHeader.source
+    }
+    if (osmHeader.osmosis_replication_timestamp !== 0) {
+      output.osm3s.timestamp_osm_base = new Date(osmHeader.osmosis_replication_timestamp*1000).toISOString().substr(0, 19) + 'Z'
+    }
+  }
+  if (osmHeader.bbox !== null) {
+    output.bounds = {
       "minlat": 1E-9 * osmHeader.bbox.bottom,
       "minlon": 1E-9 * osmHeader.bbox.left,
       "maxlat": 1E-9 * osmHeader.bbox.top,
       "maxlon": 1E-9 * osmHeader.bbox.right
-    },
-    "elements": output
+    }
   }
+  output.elements = elements
+  return output
 }
