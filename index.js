@@ -207,6 +207,8 @@ module.exports = function(input, handler) {
             var out = {
               type: 'node',
               id: p.nodes[i].id,
+              lat: osmData.lat_offset + (osmData.granularity * p.nodes[i].lat),
+              lon: osmData.lon_offset + (osmData.granularity * p.nodes[i].lon),
               tags: tags
             }
             if (p.nodes[i].info !== null) {
