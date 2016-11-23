@@ -45,8 +45,14 @@ function extractBlobData(blob) {
   }
 }
 
-module.exports = function(input) {
-  var output = []
+module.exports = function(input, handler) {
+  var output = undefined
+  if (handler === undefined) {
+    var output = []
+    handler = function(element) {
+      output.push(element)
+    }
+  }
 
   var blobHeaderLength, blobHeader, blob, blobData
 
@@ -154,7 +160,7 @@ module.exports = function(input) {
               if (p.relations[i].info.user_sid !== undefined)  out.user      = strings[p.relations[i].info.user_sid]
               if (p.relations[i].info.visible !== undefined)   out.visible   = p.relations[i].info.visible
             }
-            output.push(out)
+            handler(out)
           }
         break
 
@@ -182,7 +188,7 @@ module.exports = function(input) {
               if (p.ways[i].info.user_sid !== undefined)  out.user      = strings[p.ways[i].info.user_sid]
               if (p.ways[i].info.visible !== undefined)   out.visible   = p.ways[i].info.visible
             }
-            output.push(out)
+            handler(out)
           }
         break
 
@@ -206,7 +212,7 @@ module.exports = function(input) {
               if (p.nodes[i].info.user_sid !== undefined)  out.user      = strings[p.nodes[i].info.user_sid]
               if (p.nodes[i].info.visible !== undefined)   out.visible   = p.nodes[i].info.visible
             }
-            output.push(out)
+            handler(out)
           }
         break
 
@@ -256,7 +262,7 @@ module.exports = function(input) {
               if (p.dense.denseinfo.user_sid !== null)  out.user      = strings[user]
               if (p.dense.denseinfo.visible !== null)   out.visible   = p.dense.denseinfo.visible[i]
             }
-            output.push(out)
+            handler(out)
           }
         break
       }

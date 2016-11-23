@@ -25,7 +25,7 @@ test('manyNodes.pbf', function(t) {
   t.plan(1)
   var output = conv(input)
 
-  t.equal(3000, output.elements.length)
+  t.equal(output.elements.length, 3000)
 })
 
 test('test.pbf', function(t) {
@@ -60,4 +60,20 @@ test('test.pbf', function(t) {
   var rels = output.elements.filter(function(o) { return o.type === 'relation' })
   t.equal(rels.length, 1)
   t.equal(rels[0].id, 56688)
+})
+
+test('custom handler', function(t) {
+  var input = fs.readFileSync(path.join(__dirname, './somes.pbf'))
+
+  t.plan(2)
+
+  var count = 0
+  var last
+  var output = conv(input, function(element) {
+    count++
+    last = element
+  })
+
+  t.equal(count, 1577)
+  t.equal(last.type, "relation")
 })
