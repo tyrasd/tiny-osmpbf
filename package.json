@@ -1,6 +1,6 @@
 {
   "name": "tiny-osmpbf",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "smallest osm.pbf parser",
   "main": "index.js",
   "dependencies": {
