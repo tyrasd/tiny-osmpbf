@@ -113,7 +113,7 @@ StringTable.write = function (obj, pbf) {
 var Info = exports.Info = {};
 
 Info.read = function (pbf, end) {
-    return pbf.readFields(Info._readField, {version: 0, timestamp: 0, changeset: 0, uid: 0, user_sid: 0, visible: false}, end);
+    return pbf.readFields(Info._readField, {version: 0, timestamp: 0, changeset: 0, uid: 0, user_sid: 0, visible: undefined}, end);
 };
 Info._readField = function (tag, obj, pbf) {
     if (tag === 1) obj.version = pbf.readVarint(true);

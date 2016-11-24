@@ -140,7 +140,6 @@ module.exports = function(input, handler) {
         // * list of osm relations
         case p.relations.length > 0:
           for (var i=0; i<p.relations.length; i++) {
-            if (p.relations[i].info === null) p.relations[i].info = {}
             var tags = {}
             for (var j=0; j<p.relations[i].keys.length; j++)
               tags[strings[p.relations[i].keys[j]]] = strings[p.relations[i].vals[j]]
@@ -158,12 +157,12 @@ module.exports = function(input, handler) {
               tags: tags
             }
             if (p.relations[i].info !== null) {
-              if (p.relations[i].info.version !== undefined)   out.version   = p.relations[i].info.version
-              if (p.relations[i].info.timestamp !== undefined) out.timestamp = new Date(p.relations[i].info.timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z'
-              if (p.relations[i].info.changeset !== undefined) out.changeset = p.relations[i].info.changeset
-              if (p.relations[i].info.uid !== undefined)       out.uid       = p.relations[i].info.uid
-              if (p.relations[i].info.user_sid !== undefined)  out.user      = strings[p.relations[i].info.user_sid]
-              if (p.relations[i].info.visible !== undefined)   out.visible   = p.relations[i].info.visible
+              if (p.relations[i].info.version !== 0)   out.version   = p.relations[i].info.version
+              if (p.relations[i].info.timestamp !== 0) out.timestamp = new Date(p.relations[i].info.timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z'
+              if (p.relations[i].info.changeset !== 0) out.changeset = p.relations[i].info.changeset
+              if (p.relations[i].info.uid !== 0)       out.uid       = p.relations[i].info.uid
+              if (p.relations[i].info.user_sid !== 0)  out.user      = strings[p.relations[i].info.user_sid]
+              if (p.relations[i].info.visible !== undefined) out.visible   = p.relations[i].info.visible
             }
             handler(out)
           }
@@ -172,7 +171,6 @@ module.exports = function(input, handler) {
         // * list of osm ways
         case p.ways.length > 0:
           for (var i=0; i<p.ways.length; i++) {
-            if (p.ways[i].info === null) p.ways[i].info = {}
             var tags = {}
             for (var j=0; j<p.ways[i].keys.length; j++)
               tags[strings[p.ways[i].keys[j]]] = strings[p.ways[i].vals[j]]
@@ -186,12 +184,12 @@ module.exports = function(input, handler) {
               tags: tags
             }
             if (p.ways[i].info !== null) {
-              if (p.ways[i].info.version !== undefined)   out.version   = p.ways[i].info.version
-              if (p.ways[i].info.timestamp !== undefined) out.timestamp = new Date(p.ways[i].info.timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z'
-              if (p.ways[i].info.changeset !== undefined) out.changeset = p.ways[i].info.changeset
-              if (p.ways[i].info.uid !== undefined)       out.uid       = p.ways[i].info.uid
-              if (p.ways[i].info.user_sid !== undefined)  out.user      = strings[p.ways[i].info.user_sid]
-              if (p.ways[i].info.visible !== undefined)   out.visible   = p.ways[i].info.visible
+              if (p.ways[i].info.version !== 0)   out.version   = p.ways[i].info.version
+              if (p.ways[i].info.timestamp !== 0) out.timestamp = new Date(p.ways[i].info.timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z'
+              if (p.ways[i].info.changeset !== 0) out.changeset = p.ways[i].info.changeset
+              if (p.ways[i].info.uid !== 0)       out.uid       = p.ways[i].info.uid
+              if (p.ways[i].info.user_sid !== 0)  out.user      = strings[p.ways[i].info.user_sid]
+              if (p.ways[i].info.visible !== undefined) out.visible   = p.ways[i].info.visible
             }
             handler(out)
           }
@@ -200,7 +198,6 @@ module.exports = function(input, handler) {
         // * list of osm nodes
         case p.nodes.length > 0:
           for (var i=0; i<p.nodes.length; i++) {
-            if (p.nodes[i].info === null) p.nodes[i].info = {}
             var tags = {}
             for (var j=0; j<p.nodes[i].keys.length; j++)
               tags[strings[p.nodes[i].keys[j]]] = strings[p.nodes[i].vals[j]]
@@ -212,12 +209,12 @@ module.exports = function(input, handler) {
               tags: tags
             }
             if (p.nodes[i].info !== null) {
-              if (p.nodes[i].info.version !== undefined)   out.version   = p.nodes[i].info.version
-              if (p.nodes[i].info.timestamp !== undefined) out.timestamp = new Date(p.nodes[i].info.timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z'
-              if (p.nodes[i].info.changeset !== undefined) out.changeset = p.nodes[i].info.changeset
-              if (p.nodes[i].info.uid !== undefined)       out.uid       = p.nodes[i].info.uid
-              if (p.nodes[i].info.user_sid !== undefined)  out.user      = strings[p.nodes[i].info.user_sid]
-              if (p.nodes[i].info.visible !== undefined)   out.visible   = p.nodes[i].info.visible
+              if (p.nodes[i].info.version !== 0)   out.version   = p.nodes[i].info.version
+              if (p.nodes[i].info.timestamp !== 0) out.timestamp = new Date(p.nodes[i].info.timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z'
+              if (p.nodes[i].info.changeset !== 0) out.changeset = p.nodes[i].info.changeset
+              if (p.nodes[i].info.uid !== 0)       out.uid       = p.nodes[i].info.uid
+              if (p.nodes[i].info.user_sid !== 0)  out.user      = strings[p.nodes[i].info.user_sid]
+              if (p.nodes[i].info.visible !== undefined) out.visible   = p.nodes[i].info.visible
             }
             handler(out)
           }
@@ -225,16 +222,17 @@ module.exports = function(input, handler) {
 
         // * dense list of osm nodes
         case p.dense !== null:
-          var id=0,lat=0,lon=0,timestamp=0,changeset=0,uid=0,user=0 //todo:visible
+          var id=0,lat=0,lon=0,timestamp=0,changeset=0,uid=0,user=0
           var hasDenseinfo = true
           if (p.dense.denseinfo === null) {
             hasDenseinfo = false
             p.dense.denseinfo = {
+              version: [],
               timestamp: [],
               changeset: [],
               uid: [],
               user_sid: [],
-              version: []
+              visible: []
             }
           }
           var j=0
@@ -262,12 +260,12 @@ module.exports = function(input, handler) {
               tags: tags
             }
             if (hasDenseinfo) {
-              if (p.dense.denseinfo.version !== null)   out.version   = p.dense.denseinfo.version[i]
-              if (p.dense.denseinfo.timestamp !== null) out.timestamp = new Date(timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z'
-              if (p.dense.denseinfo.changeset !== null) out.changeset = changeset
-              if (p.dense.denseinfo.uid !== null)       out.uid       = uid
-              if (p.dense.denseinfo.user_sid !== null)  out.user      = strings[user]
-              if (p.dense.denseinfo.visible !== null)   out.visible   = p.dense.denseinfo.visible[i]
+              if (p.dense.denseinfo.version.length > 0)   out.version   = p.dense.denseinfo.version[i]
+              if (p.dense.denseinfo.timestamp.length > 0) out.timestamp = new Date(timestamp*osmData.date_granularity).toISOString().substr(0, 19) + 'Z'
+              if (p.dense.denseinfo.changeset.length > 0) out.changeset = changeset
+              if (p.dense.denseinfo.uid.length > 0)       out.uid       = uid
+              if (p.dense.denseinfo.user_sid.length > 0)  out.user      = strings[user]
+              if (p.dense.denseinfo.visible.length > 0)   out.visible   = p.dense.denseinfo.visible[i]
             }
             handler(out)
           }
