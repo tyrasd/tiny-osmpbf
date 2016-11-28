@@ -1,49 +1,11 @@
+// "zlib" decompression
 var inflate = require('tiny-inflate')
+// protocol buffers library
 var Pbf = require('pbf')
+// readers for the two pbf formats used in a osmpbf file
 var FileFormat = require('./proto/fileformat.js')
 var OsmFormat = require('./proto/osmformat.js')
 
-var memberTypes = {
-  0: 'node',
-  1: 'way',
-  2: 'relation'
-}
-
-var supportedFeatures = {
-  "OsmSchema-V0.6": true,
-  "DenseNodes": true,
-  "HistoricalInformation": true
-}
-
-
-// extracts and decompresses a data blob
-function extractBlobData(blob) {
-  // todo: add tests for non-zlib cases
-  switch (true) {
-    // error cases:
-
-    // * lzma compressed data (support for this kind of data is not required by the specs)
-    case blob.lzma_data !== null:
-      throw new Error("unsupported osmpbf blob data type: lzma_data")
-    // * formerly used for bzip2 compressed data, deprecated since 2010
-    case blob.OBSOLETE_bzip2_data !== null:
-      throw new Error("unsupported osmpbf blob data type: OBSOLETE_bzip2_data")
-    // * empty data blob??
-    default:
-      throw new Error("unsupported osmpbf blob data type: <empty blob>")
-
-    // supported data formats:
-
-    // * uncompressed data
-    case blob.raw !== null:
-      return blob.raw
-    // * zlib "deflate" compressed data
-    case blob.zlib_data !== null:
-      var blobData = new Buffer(blob.raw_size)
-      inflate(blob.zlib_data.slice(2), blobData)
-      return blobData
-  }
-}
 
 /* main function of the library
  * input: osmpbf data as a javascript arraybuffer
@@ -522,4 +484,49 @@ module.exports = function(input, handler) {
   }
   output.elements = elements
   return output
+}
+
+/* some helpers */
+
+// supported osmpbf "features"
+var supportedFeatures = {
+  "OsmSchema-V0.6": true,
+  "DenseNodes": true,
+  "HistoricalInformation": true
+}
+
+// convert enum values to actual relation member types
+var memberTypes = {
+  0: 'node',
+  1: 'way',
+  2: 'relation'
+}
+
+// helper function that extracts / decompresses a data blob
+function extractBlobData(blob) {
+  // todo: add tests for non-zlib cases
+  switch (true) {
+    // error cases:
+
+    // * lzma compressed data (support for this kind of data is not required by the specs)
+    case blob.lzma_data !== null:
+      throw new Error("unsupported osmpbf blob data type: lzma_data")
+    // * formerly used for bzip2 compressed data, deprecated since 2010
+    case blob.OBSOLETE_bzip2_data !== null:
+      throw new Error("unsupported osmpbf blob data type: OBSOLETE_bzip2_data")
+    // * empty data blob??
+    default:
+      throw new Error("unsupported osmpbf blob data type: <empty blob>")
+
+    // supported data formats:
+
+    // * uncompressed data
+    case blob.raw !== null:
+      return blob.raw
+    // * zlib "deflate" compressed data
+    case blob.zlib_data !== null:
+      var blobData = new Buffer(blob.raw_size)
+      inflate(blob.zlib_data.slice(2), blobData)
+      return blobData
+  }
 }
