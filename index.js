@@ -72,13 +72,19 @@ module.exports = function(input, handler) {
   */
 
   pbf = new Pbf(input)
+  pbf.length = 0
+  // helper function to wind pbf reader forward
+  pbf.forward = function(nextLength, relative) {
+    this.pos = this.length
+    this.length += nextLength
+  }
 
+  pbf.forward(4)
   blobHeaderLength = new DataView(new Uint8Array(input).buffer).getInt32(pbf.pos, false)
 
   // we now know the length of the first blobHeader: wind the pbf buffer forward and parse the data
 
-  pbf.pos += 4
-  pbf.length = pbf.pos + blobHeaderLength
+  pbf.forward(blobHeaderLength)
   blobHeader = FileFormat.BlobHeader.read(pbf)
 
   /* A BlobHeader contains information about the following data blob.
@@ -94,8 +100,7 @@ module.exports = function(input, handler) {
    *   { type: 'OSMHeader', indexdata: null, datasize: 72 }
    */
 
-  pbf.pos = pbf.length
-  pbf.length = pbf.pos + blobHeader.datasize
+  pbf.forward(blobHeader.datasize)
   blob = FileFormat.Blob.read(pbf)
 
   /* A blob is used to store an (either uncompressed or zlib/deflate compressed)
@@ -167,16 +172,14 @@ module.exports = function(input, handler) {
   // read all data blobs
   while (pbf.pos < input.byteLength) {
 
-    pbf.pos = pbf.length
+    pbf.forward(4)
     blobHeaderLength = new DataView(new Uint8Array(input).buffer).getInt32(pbf.pos, false)
-    pbf.pos += 4
-    pbf.length = pbf.pos + blobHeaderLength
+    pbf.forward(blobHeaderLength)
     blobHeader = FileFormat.BlobHeader.read(pbf)
 
     // the blobHeader contains the size of the following data blob
 
-    pbf.pos = pbf.length
-    pbf.length = pbf.pos + blobHeader.datasize
+    pbf.forward(blobHeader.datasize)
     blob = FileFormat.Blob.read(pbf)
 
     blobData = extractBlobData(blob)
