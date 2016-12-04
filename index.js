@@ -62,6 +62,12 @@ module.exports = function(input, handler) {
    *   { type: 'OSMHeader', indexdata: null, datasize: 72 }
    */
 
+  if (blobHeader.type !== 'OSMHeader') {
+    throw new Error("unsupported: expected first osmpbf blob to be of type 'OSMHeader', but found '"+OSMHeader.type+"'")
+  }
+
+  // the blob header knows the size of the following data blob:
+
   pbf.forward(blobHeader.datasize)
   blob = FileFormat.Blob.read(pbf)
 
@@ -138,6 +144,12 @@ module.exports = function(input, handler) {
     blobHeaderLength = new DataView(new Uint8Array(input).buffer).getInt32(pbf.pos, false)
     pbf.forward(blobHeaderLength)
     blobHeader = FileFormat.BlobHeader.read(pbf)
+
+    if (blobHeader.type !== 'OSMData') {
+      // ignore any unknown data blobs (which may or may not be introduced in future versions of the osmpbf format)
+      pbf.forward(blobHeader.datasize)
+      continue
+    }
 
     // the blobHeader contains the size of the following data blob
 
