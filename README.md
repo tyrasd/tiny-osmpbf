@@ -3,6 +3,8 @@
 A lightweight parsing library for the [osm.pbf](https://wiki.openstreetmap.org/wiki/PBF_Format) format used for OpenStreetMap raw data.
 Written in pure javascript. Works in nodejs and the browser.
 
+[![JavaScript Style Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+
 ## Background
 
 Contrary to other osm pbf parsing libraries, tiny-osmpbf isn't purely optimized for speed, but mainly towards ease-of-use and small code footprint (it's less than 16kB minified and gzipped).

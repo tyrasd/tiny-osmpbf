@@ -9,10 +9,11 @@
   },
   "devDependencies": {
     "faucet": "0.0.1",
+    "standard": "*",
     "tape": "^4.6.2"
   },
   "scripts": {
-    "test": "node test/index.js | faucet"
+    "test": "standard index.js && node test/index.js | faucet"
   },
   "author": "Martin Raifer",
   "license": "ISC",
