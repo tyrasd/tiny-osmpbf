@@ -86,7 +86,8 @@ The returned data is in the [*OSM-JSON*](https://overpass-api.de/output_formats.
 
 ## See Also
 
-* [osm-pbf-parser](https://github.com/substack/osm-pbf-parser) a streaming parser for osm pbf
+* [pbf2json](https://github.com/pelias/pbf2json)
+* [osm-pbf-parser](https://www.npmjs.com/package/osm-pbf-parser) a streaming parser for osm pbf
 * [osm-read](https://github.com/marook/osm-read) a parser that supports both pbf and xml formats
 * [node-osmium](https://github.com/osmcode/node-osmium) nodejs bindings for the [libosmium](https://github.com/osmcode/libosmium) C++ library
 * [pbf parser comparison](https://github.com/pelias/pbf-parser-comparison) by mapzen
